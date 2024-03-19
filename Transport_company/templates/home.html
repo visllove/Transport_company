@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="/static/home.css"/>
+    <link rel="icon" href="/static/Demo.jsx"/>
+    <!-- Unicons CSS -->
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
+   <script src="script.js" defer></script>
+  </head>
+  <body>
+    <nav class="nav"> 
+      <i class="uil uil-bars navOpenBtn"></i>
+            <button type="button" aria-label="Account" class="zbi">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 4a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7ZM7.5 7.5a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0Zm0 7.5A3.5 3.5 0 0 0 4 18.5V21H3v-2.5A4.5 4.5 0 0 1 7.5 14h9a4.5 4.5 0 0 1 4.5 4.5V21h-1v-2.5a3.5 3.5 0 0 0-3.5-3.5h-9Z"/></svg>
+            </button>
+        <a href="{{ url_for('show_table', table='clients') }}" class="submit">Clients</a>
+        <a href="{{ url_for('show_table', table='drivers') }}" class="submit">Drivers</a>
+        <a href="{{ url_for('show_table', table='transport') }}" class="submit">Transport</a>
+        <a href="{{ url_for('show_table', table='orders') }}" class="submit">Orders</a>
+        <a href="{{ url_for('show_table', table='cargo') }}" class="submit">Cargo</a>
+        <a href="{{ url_for('show_table', table='routes') }}" class="submit">Routes</a>
+    </nav>
+  </body>
+</html>
+
+ 
