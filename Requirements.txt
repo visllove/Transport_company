@@ -1,0 +1,8 @@
+pip install flask
+pip install flask-sqlalchemy
+pip install flask-login
+pip install flask-bcrypt
+pip install folium
+pip install flask-admin
+pip install mysqlclient
+pip install secrets
