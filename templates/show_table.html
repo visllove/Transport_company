@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="/static/show_table.css">
+    <script defer src="{{ url_for('static', filename='scripts.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ table }} Table</title>
+    <!-- уведомления flash -->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul class="flashes">
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+</head>
+<style>
+    html,
+    body {
+        height: 100vh;
+        margin-top: 0;
+        margin-bottom: 0;
+        padding: 0;
+        overflow-x: hidden;
+        /* Prevent horizontal scrollbar */
+    }
+
+    #editFormContainer {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #f9f9f9;
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        z-index: 9999;
+        /* Ensure the form appears above other elements */
+        max-width: 600px;
+        /* Adjust the width of the form */
+        width: 80%;
+        /* Adjust the width of the form */
+        max-height: 90vh;
+        /* Limit the height to 90% of viewport height */
+        overflow-y: auto;
+        /* Add scroll bar when content overflows */
+    }
+
+    #editFormContainer h2 {
+        margin-top: 0;
+        margin-bottom: 20px;
+        font-size: 2rem;
+        text-align: center;
+        color: #333;
+    }
+
+    #editFormContainer label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: bold;
+        color: #555;
+    }
+
+    #editFormContainer input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    #editFormContainer button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 15px 25px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1.1rem;
+        transition: background-color 0.3s ease;
+    }
+
+    #editFormContainer button[type="submit"] {
+        margin-right: 10px;
+    }
+
+    #editFormContainer button[type="button"] {
+        background-color: #f44336;
+    }
+
+    /* Add hover effect to buttons */
+    #editFormContainer button:hover {
+        background-color: #45a049;
+    }
+</style>
+<style>
+    #confirmationMessage {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    #confirmationMessage button {
+        margin: 0 10px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
+    }
+
+    #confirmationMessage button:hover {
+        background-color: #f0f0f0;
+    }
+</style>
+<style>
+    /* Custom styles for "Show [entries]" dropdown */
+    .dataTables_length {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #777;
+    }
+
+    .dataTables_length select {
+        padding: 3px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+        color: #333;
+    }
+
+    /* Custom styles for search input */
+    .dataTables_filter {
+        margin-top: 10px;
+    }
+
+    .dataTables_filter input {
+        padding: 3px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+        color: #333;
+    }
+
+    /* Styling for the message */
+    .dataTables_info {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #777;
+    }
+
+    /* Styling for the pagination buttons */
+    .dataTables_paginate {
+        margin-top: 10px;
+        position: fixed;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+    }
+
+    .paginate_button {
+        padding: 5px 10px;
+        margin-right: 5px;
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 14px;
+        color: #333;
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+    }
+
+    .paginate_button:hover {
+        background-color: #e0e0e0;
+    }
+
+    .paginate_button.current {
+        background-color: transparent;
+        color: #fff;
+        border-color: transparent;
+    }
+</style>
+
+
+
+
+<body>
+    <h1>{{ table.capitalize() }} Table</h1>
+
+    {% if table == 'routes' %}
+    <style>
+        body {
+            background-image: url(/static/routes.jpeg);
+        }
+    </style>
+    {% elif table == 'transport' %}
+    <style>
+        body {
+            background-image: url(/static/transport.jpg);
+        }
+    </style>
+    {% elif table == 'orders' %}
+    <style>
+        body {
+            background-image: url(/static/orders.jpeg);
+        }
+    </style>
+    {% elif table == 'clients' %}
+    <style>
+        body {
+            background-image: url(/static/clients.jpg);
+        }
+    </style>
+
+    {% elif table == 'drivers' %}
+    <style>
+        body {
+            background-image: url(/static/drivers.jpeg);
+        }
+    </style>
+    {% elif table == 'cargo' %}
+    <style>
+        body {
+            background-image: url(/static/cargo.jpg);
+        }
+    </style>
+    {% endif %}
+
+    <!-- Confirmation message at the center -->
+    <div id="confirmationMessage"
+        style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #ffffff; padding: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); z-index: 1000;">
+        Are you sure?
+        <button id="confirmYes">Yes</button>
+        <button id="confirmNo">No</button>
+    </div>
+
+    <!-- Toast notification for success -->
+    <div id="successNotification"
+        style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: transparent; color: #fff; padding: 15px 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); z-index: 9999;">
+        Item deleted successfully
+    </div>
+
+    <!-- Toast notification for error -->
+    <div id="errorNotification"
+        style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #ff6347; color: #fff; padding: 15px 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); z-index: 9999;">
+        Error: You cannot delete this item it's connected with other items
+    </div>
+
+    <div id="tableContainer">
+        <form id="inputForm" method="post"
+            style="background-color: transparent; border-radius: 5px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
+            <table><!-- Add a table element -->
+                {% for column in data[0].__table__.columns|batch(7) %}
+                <tr>
+                    <!-- Loop through the table headers starting from the second column -->
+                    {% for col in column[1:] %}
+                    <td><input type="text" name="{{ col.name }}" placeholder="{{ col.name }}"
+                            style="width: 100%; padding: 5px; margin-bottom: 5px; border: 1px solid black; border-radius: 4px; background-color: transparent; color: #000000;">
+                    </td>
+                    {% endfor %}
+                    <!-- Add an empty cell for the submit button -->
+                    {% if loop.last %}
+                    <!-- <td colspan="{{ 7 - column|length }}"></td> -->
+                    <td style="text-align: center;">
+                        <button type="button" id="submitButton" onclick="submitForm()"
+                            style="background-color: transparent; color: black; padding: 5px; border: none; border-radius: 5px; cursor: pointer;"><i
+                                class="fa-solid fa-check"></i></button>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </table>
+        </form>
+
+        
+
+        <table id="myTable" border="1">
+            <thead class="trd">
+                <tr>
+                    {% for column in data[0].__table__.columns %}
+                    <th>{{ column.name }}</th>
+                    {% endfor %}
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in data %}
+                <tr>
+                    {% for column in data[0].__table__.columns %}
+                    <td>{{ item.__dict__.get(column.name, '') }}</td>
+                    {% endfor %}
+                    <td>
+                        <div style="display: inline-block;">
+                            <button class="btn-form edit_row_button" data-table="{{ table }}"
+                                data-item-id="{{ item[primary_key] }}">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                        </div>
+                        <div style="display: inline-block;">
+                            <button class="btn-form delete-btn" data-table="{{ table }}"
+                                data-item-id="{{ item[primary_key] }}">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                        {% if table == 'routes' %}
+                        <div style="display: inline-block;">
+                            <form action="{{ url_for('show_map', table=table, item_id=item[primary_key]) }}"
+                                method="post">
+                                <button class="btn-form" type="submit">
+                                    <i class="fa-solid fa-earth-americas" style="color: #000000;"></i>
+                                </button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+    <!-- deleting function -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.delete-btn').click(function () {
+                var button = $(this);
+                var table = '{{ table }}';
+                var item_id = button.data('item-id');
+
+                // Show the confirmation message
+                $('#confirmationMessage').show();
+
+                // Handle confirmation
+                $('#confirmYes').click(function () {
+                    $.ajax({
+                        type: 'POST',
+                        url: '/delete/' + table + '/' + item_id,
+                        success: function (response) {
+                            // Show notification for successful deletion
+                            showSuccessNotification();
+                            // Remove the deleted item from the table
+                            button.closest('tr').remove();
+                        },
+                        error: function (xhr, status, error) {
+                            // Show error message as toast notification
+                            showErrorNotification();
+                        }
+                    });
+
+                    // Hide the confirmation message
+                    $('#confirmationMessage').hide();
+                });
+
+                // Handle cancellation
+                $('#confirmNo').click(function () {
+                    // Hide the confirmation message
+                    $('#confirmationMessage').hide();
+                });
+            });
+        });
+
+        function showSuccessNotification() {
+            var successNotification = $('#successNotification');
+            successNotification.fadeIn().delay(3000).fadeOut();
+        }
+
+        function showErrorNotification() {
+            var errorNotification = $('#errorNotification');
+            errorNotification.fadeIn().delay(3000).fadeOut();
+        }
+
+    </script>
+    <script>
+        function submitForm() {
+            // Serialize form data
+            var formData = $('#inputForm').serialize();
+
+            // Send form data to Flask route using AJAX
+            $.ajax({
+                type: "POST",
+                url: "{{ url_for('submit_form', table=table) }}",
+                data: formData,
+                success: function (response) {
+                    // Handle success response if needed
+                    console.log(response.message);
+
+                    // Clear form inputs if submission is successful
+                    $('#inputForm')[0].reset();
+
+                    // Refresh the table content
+                    refreshTable();
+
+                    // Show notification for successful Adding
+                    showSuccessNotification();
+                },
+                error: function (xhr, status, error) {
+                    // Handle error response if needed
+                    console.error("Error submitting form:", error);
+                }
+            });
+        }
+
+        function refreshTable() {
+            // Make a GET request to fetch updated table content
+            $.get(window.location.href, function (data) {
+                // Find the updated table content
+                var newTableContent = $(data).find('#myTable');
+
+                // Destroy the existing DataTable instance
+                $('#myTable').DataTable().destroy();
+
+                // Replace the existing table body with the updated content
+                $('#myTable tbody').html(newTableContent.find('tbody').html());
+
+                // Reinitialize DataTables plugin
+                $('#myTable').DataTable({
+                    "order": [[0, "desc"]],
+                    "searching": true,
+                    "paging": true, // Enable pagination
+                    "pageLength": 8, // Limit number of rows per page to 8
+                    "info": true,
+                    "lengthChange": true,
+                    "columnDefs": [{
+                        "targets": [-1],
+                        "orderable": false,
+                        "searchable": false
+                    }]
+                });
+            });
+        }
+
+
+
+        function showSuccessNotification() {
+            var successNotification = $('#successNotification');
+            successNotification.fadeIn().delay(3000).fadeOut();
+        }
+    </script>
+
+
+    <script type="text/javascript" charset="utf8" src="//code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" charset="utf8"
+        src="//cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Check if the table is already a DataTable instance
+            if (!$.fn.DataTable.isDataTable('#myTable')) {
+                // If it's not, initialize DataTable
+                $('#myTable').DataTable({
+                    "order": [[0, "desc"]],
+                    "searching": true,
+                    "paging": true, // Enable pagination
+                    "pageLength": 8, // Limit number of rows per page to 8
+                    "info": true,
+                    "lengthChange": true,
+                    "columnDefs": [{
+                        "targets": [-1],
+                        "orderable": false,
+                        "searchable": false
+                    }]
+                });
+            }
+        });
+    </script>
+
+
+    <div id="editFormContainer" style="display: none;">
+        <form id="editForm"
+            style="background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+            <!-- Show item ID as h2 -->
+            <h2 id="editItemIdHeader"></h2>
+            <!-- Add input fields for each column -->
+            {% for column in data[0].__table__.columns %}
+            <div>
+                <label for="{{ column.name }}">{{ column.name }}:</label>
+                <input type="text" name="{{ column.name }}" id="{{ column.name }}">
+            </div>
+            {% endfor %}
+            <!-- Add a hidden input field for the item ID -->
+            <input type="hidden" name="item_id" id="editItemId">
+            <!-- Include the primary key (item ID) as a hidden input field -->
+
+            <button type="submit">Save</button>
+            <button type="button" id="cancelEdit">Cancel</button>
+        </form>
+    </div>
+
+
+    <script>
+
+        $(document).ready(function () {
+            let itemId;
+            // Handle edit button click
+            $('.edit_row_button').click(function () {
+                // Get the corresponding item ID from the data attribute of the button
+                itemId = $(this).data('item-id');
+
+                // Set the value of the hidden input field with the item ID
+                $('#editItemId').val(itemId);
+
+                // Update the h2 element to display the item ID
+                $('#editItemIdHeader').text('Item ID: ' + itemId);
+
+                // Get the corresponding row data
+                var rowData = $(this).closest('tr').find('td').map(function () {
+                    return $(this).text();
+                }).get();
+
+                // Populate the input fields in the edit form with the row data
+                $('#editForm input').each(function (index) {
+                    $(this).val(rowData[index]);
+                });
+
+                // Show the edit form
+                $('#editFormContainer').show();
+            });
+
+            // Handle form submission
+            $('#editForm').submit(function (event) {
+                event.preventDefault();
+
+                // Get the updated data from the form
+                var updatedData = $(this).serialize();
+
+                // Send updatedData to server to update the corresponding row using AJAX
+                $.ajax({
+                    type: "POST",
+                    url: "/update_item/" + '{{table}}' + '/' + itemId,
+                    data: updatedData,
+                    success: function (response) {
+                        // Handle success response if needed
+                        console.log(response.message);
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle error response if needed
+                        console.error("Error updating item:", error);
+                    }
+                });
+
+                // Hide the edit form
+                $('#editFormContainer').hide();
+            });
+
+            // Handle cancel button click
+            $('#cancelEdit').click(function () {
+                // Hide the edit form
+                $('#editFormContainer').hide();
+            });
+        });
+
+    </script>
+
+</body>
+
+</html>
