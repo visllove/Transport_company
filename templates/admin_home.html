@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="/static/home.css"/>
+    <link rel='stylesheet' href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css'><link rel="stylesheet" href="/static/Home2.css">
+   <script src="script.js" defer></script>
+    </head>
+  <body>
+     
+    <!-- partial:index.partial.html -->
+<div class="sidebar">
+  <div class="logo-details">
+    <i class='bx bxl-c-plus-plus icon'></i>
+    <div class="logo_name">TC Wega</div>
+    <i class='bx bx-menu' id="btn"></i>
+  </div>
+  <ul class="nav-list">
+    <li>
+      <i class='bx bx-search'></i>
+      <input type="text">
+      <span class="tooltip">Search</span>
+    </li>
+    <li>
+      <a href="#">
+        <i class='bx bx-grid-alt'></i>
+        <span class="links_name">Dashboard</span>
+      </a>
+      <span class="tooltip">Dashboard</span>
+    </li>
+    <li>
+      <a href="#">
+        <i class='bx bx-user'></i>
+        <span class="links_name">User</span>
+      </a>
+      <span class="tooltip">User</span>
+    </li>
+    <li>
+      <a href="#">
+        <i class='bx bx-chat'></i>
+        <span class="links_name">Messages</span>
+      </a>
+      <span class="tooltip">Messages</span>
+    </li>
+    <li>
+      <a href="http://127.0.0.1/openserver/phpmyadmin/">
+        <i class="bx bx-shield-quarter"></i>
+        <span class="links_name">Administration</span>
+      </a>
+      <span class="tooltip">Administration</span>
+    </li>
+    <li>
+      <a href="#">
+        <i class='bx bx-folder'></i>
+        <span class="links_name">File Manager</span>
+      </a>
+      <span class="tooltip">Files</span>
+    </li>
+    <li>
+      <a href="#">
+        <i class='bx bx-cart-alt'></i>
+        <span class="links_name">Order</span>
+      </a>
+      <span class="tooltip">Order</span>
+    </li>
+    <li>
+      <a href="#">
+        <i class='bx bx-heart'></i>
+        <span class="links_name">Map</span>
+      </a>
+      <span class="tooltip">Map</span>
+    </li>
+    <li>
+      <a href="#">
+        <i class='bx bx-cog'></i>
+        <span class="links_name">Setting</span>
+      </a>
+      <span class="tooltip">Setting</span>
+    </li>
+    <li class="profile">
+      <a href="{{url_for('logout')}}">
+      <div class="profile-details">
+        <div class="name_job">
+          <span class="name">{{cur_user}}</span>
+        </div>
+      </div>
+      <i class='bx bx-log-out' id="log_out"><input type="submit" value="Logout"></i>
+    </a>
+    </li>
+  </ul>
+</div>
+  <nav class="nav"> 
+    <i class="uil uil-bars navOpenBtn"></i>
+      <a href="{{ url_for('show_table', table='clients') }}" class="submit">Clients</a>
+      <a href="{{ url_for('show_table', table='drivers') }}" class="submit">Drivers</a>
+      <a href="{{ url_for('show_table', table='transport') }}" class="submit">Transport</a>
+      <a href="{{ url_for('show_table', table='orders') }}" class="submit">Orders</a>
+      <a href="{{ url_for('show_table', table='cargo') }}" class="submit">Cargo</a>
+      <a href="{{ url_for('show_table', table='routes') }}" class="submit">Routes</a>
+  </nav>
+  <script  src="/static/scripts.js"></script>
+  </body>
+</html>
+
+ 
